@@ -131,3 +131,28 @@ func TestRun_ValidationRetry(t *testing.T) {
 		t.Fatalf("got %q", out.String())
 	}
 }
+
+func TestRun_CSVModeQuotedFields(t *testing.T) {
+	if _, err := exec.LookPath("awk"); err != nil {
+		t.Skip("awk not in PATH")
+	}
+	t.Parallel()
+	var out bytes.Buffer
+	err := Run(context.Background(), Options{
+		Query:    "print second field",
+		FieldSep: ",",
+		CSVMode:  true,
+		Stdin:    strings.NewReader("id,name\n1,\"doe, john\"\n"),
+		Stdout:   &out,
+		Stderr:   &bytes.Buffer{},
+		Client:   &llm.Mock{Text: "{ print $2 }"},
+		Provider: "openai",
+		NoCache:  true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.String() != "name\ndoe, john\n" {
+		t.Fatalf("got %q", out.String())
+	}
+}

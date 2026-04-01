@@ -48,3 +48,23 @@ func TestValidateAndRun(t *testing.T) {
 		t.Fatalf("output = %q; want b\\nd\\n", got)
 	}
 }
+
+func TestRunCSV_QuotedComma(t *testing.T) {
+	if _, err := exec.LookPath("awk"); err != nil {
+		t.Skip("awk not in PATH")
+	}
+	prog := "{ print $2 }"
+	path, err := WriteTemp(t.TempDir(), prog)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = os.Remove(path) }()
+	var out bytes.Buffer
+	in := strings.NewReader("name,city\njohn,\"new york, ny\"\n")
+	if err := RunCSV("awk", ",", path, in, &out); err != nil {
+		t.Fatalf("RunCSV: %v", err)
+	}
+	if got := out.String(); got != "city\nnew york, ny\n" {
+		t.Fatalf("output = %q; want city\\nnew york, ny\\n", got)
+	}
+}

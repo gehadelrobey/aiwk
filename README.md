@@ -107,6 +107,9 @@ cat /etc/passwd | aiwk -F: "print the username and home directory"
 
 # Parse a CSV
 cat sales.csv | aiwk -F, "show the total revenue in column 4"
+
+# Parse CSV safely when fields may contain quoted commas
+cat sales.csv | aiwk --csv -F, "show the total revenue in column 4"
 ```
 
 ### Aggregation and grouping
@@ -168,6 +171,7 @@ cat /var/log/nginx/access.log \
 | Flag | Description |
 |---|---|
 | `-F <sep>` | Field separator, passed directly to awk |
+| `--csv` | Parse stdin as CSV first (quoted fields supported), then run awk on parsed fields |
 | `--dry-run` | Print the generated awk program without executing |
 | `--explain` | Print the generated awk with inline explanatory comments |
 | `--confirm` | Prompt for approval before executing |

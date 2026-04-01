@@ -18,6 +18,7 @@ var (
 	commit  = "none"
 
 	fieldSep   string
+	csvMode    bool
 	dryRun     bool
 	explain    bool
 	confirm    bool
@@ -59,6 +60,7 @@ func init() {
 	rootCmd.SetVersionTemplate("{{.Version}}\n")
 	flags := rootCmd.Flags()
 	flags.StringVarP(&fieldSep, "field-separator", "F", "", "field separator passed to awk (-F)")
+	flags.BoolVar(&csvMode, "csv", false, "parse stdin as CSV (supports quoted fields) before running awk")
 	flags.BoolVar(&dryRun, "dry-run", false, "print generated awk without executing")
 	flags.BoolVar(&explain, "explain", false, "ask the model for commented awk")
 	flags.BoolVar(&confirm, "confirm", false, "prompt before running awk on the stream")
@@ -168,6 +170,7 @@ func runRoot(cmd *cobra.Command, args []string) error {
 	return app.Run(ctx, app.Options{
 		Query:    query,
 		FieldSep: fieldSep,
+		CSVMode:  csvMode,
 		DryRun:   dryRun,
 		Explain:  explain,
 		Confirm:  confirm,

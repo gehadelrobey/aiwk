@@ -21,7 +21,7 @@ const systemExplain = `You write POSIX awk programs for text streams. Rules:
   when comment lines starting with # are included (awk treats # as comment to EOL).`
 
 // Build returns system and user messages for the LLM.
-func Build(naturalLanguage, fieldSep string, explain bool, correction string) (system, user string) {
+func Build(naturalLanguage, fieldSep string, csvMode bool, explain bool, correction string) (system, user string) {
 	if explain {
 		system = systemExplain
 	} else {
@@ -31,7 +31,14 @@ func Build(naturalLanguage, fieldSep string, explain bool, correction string) (s
 	b.WriteString("Task (plain English):\n")
 	b.WriteString(strings.TrimSpace(naturalLanguage))
 	b.WriteString("\n")
-	if fieldSep != "" {
+	if csvMode {
+		sep := fieldSep
+		if sep == "" {
+			sep = ","
+		}
+		fmt.Fprintf(&b, "Input mode: CSV-aware parser enabled. CSV delimiter: %q.\n", sep)
+		b.WriteString("Fields are RFC4180 CSV fields mapped to $1, $2, ... in awk.\n")
+	} else if fieldSep != "" {
 		fmt.Fprintf(&b, "Field separator (-F): %q (escaped for clarity)\n", fieldSep)
 	} else {
 		b.WriteString("Field separator: whitespace (default awk)\n")

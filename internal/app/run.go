@@ -19,6 +19,7 @@ import (
 type Options struct {
 	Query    string
 	FieldSep string
+	CSVMode  bool
 
 	DryRun   bool
 	Explain  bool
@@ -72,7 +73,11 @@ func Run(ctx context.Context, o Options) error {
 	start := time.Now()
 
 	if o.Store != nil && !o.NoCache {
-		if s, hit, err := o.Store.Get(q, o.FieldSep, o.Explain, o.Provider); err != nil {
+		cacheFieldSep := o.FieldSep
+		if o.CSVMode {
+			cacheFieldSep = "__csv__:" + cacheFieldSep
+		}
+		if s, hit, err := o.Store.Get(q, cacheFieldSep, o.Explain, o.Provider); err != nil {
 			logv("cache read error: %v", err)
 		} else if hit {
 			program = s
@@ -85,7 +90,7 @@ func Run(ctx context.Context, o Options) error {
 		var correction string
 		const maxAttempts = 3
 		for attempt := 1; attempt <= maxAttempts; attempt++ {
-			sys, usr := prompt.Build(q, o.FieldSep, o.Explain, correction)
+			sys, usr := prompt.Build(q, o.FieldSep, o.CSVMode, o.Explain, correction)
 			genStart := time.Now()
 			raw, err := o.Client.Complete(ctx, sys, usr)
 			if err != nil {
@@ -114,7 +119,11 @@ func Run(ctx context.Context, o Options) error {
 			break
 		}
 		if o.Store != nil && !o.NoCache && from == "llm" {
-			if err := o.Store.Put(q, o.FieldSep, o.Explain, o.Provider, program); err != nil {
+			cacheFieldSep := o.FieldSep
+			if o.CSVMode {
+				cacheFieldSep = "__csv__:" + cacheFieldSep
+			}
+			if err := o.Store.Put(q, cacheFieldSep, o.Explain, o.Provider, program); err != nil {
 				logv("cache write error: %v", err)
 			}
 		}
@@ -149,6 +158,13 @@ func Run(ctx context.Context, o Options) error {
 		return fmt.Errorf("awk validation: %w", err)
 	}
 	execStart := time.Now()
+	if o.CSVMode {
+		if err := awk.RunCSV(o.AwkBin, o.FieldSep, tmp, o.Stdin, o.Stdout); err != nil {
+			return fmt.Errorf("awk csv: %w", err)
+		}
+		logv("awk csv finished in %s", time.Since(execStart))
+		return nil
+	}
 	if err := awk.Run(o.AwkBin, o.FieldSep, tmp, o.Stdin, o.Stdout); err != nil {
 		return fmt.Errorf("awk: %w", err)
 	}
