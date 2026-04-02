@@ -1,0 +1,4 @@
+order_id,customer,product,amount_usd
+1,"Doe, Jane","Coffee beans",19.50
+2,"Smith, John","Mug",12.00
+3,"ACME Inc.","Espresso machine",499.99
