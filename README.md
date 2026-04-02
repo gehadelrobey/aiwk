@@ -2,7 +2,7 @@
 
 > Plain English text processing for the Unix pipeline.
 
-`aiwk` is a command-line tool that lets you describe what you want in plain English and executes it as an `awk` program under the hood. It lives natively in your shell pipeline — no GUI, no chat interface, no context switching.
+`aiwk` is a command-line tool that lets you describe what you want in plain English and executes it as an `awk` program under the hood. It lives natively in your shell pipeline.
 
 ```bash
 cat access.log | aiwk "sum the bytes transferred, grouped by IP address"
@@ -34,7 +34,7 @@ Needs POSIX `awk` and an LLM API key:
 
 ```bash
 export AIWK_API_KEY="sk-..."
-export AIWK_PROVIDER="anthropic"   # openai | anthropic | ollama
+export AIWK_PROVIDER="anthropic"   # openai | anthropic | ollama (defaults to openai)
 ```
 
 ## Usage
