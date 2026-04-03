@@ -44,3 +44,23 @@ checksum:
 
 changelog:
   disable: true
+
+brews:
+  - name: aiwk
+    repository:
+      owner: gehadelrobey
+      name: homebrew-aiwk
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} {{ .Tag }}"
+    directory: Formula
+    homepage: "https://github.com/gehadelrobey/aiwk"
+    description: "Plain English text processing for the Unix pipeline"
+    license: MIT
+    install: |
+      bin.install "aiwk"
+    test: |
+      output = shell_output("#{bin}/aiwk --help")
+      assert_match "aiwk", output
+    ids:
+      - tarball

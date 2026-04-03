@@ -28,3 +28,6 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PAT with repo scope (contents: write) on gehadelrobey/homebrew-aiwk — default GITHUB_TOKEN cannot push to another repo.
+          # See https://goreleaser.com/errors/resource-not-accessible-by-integration/
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
